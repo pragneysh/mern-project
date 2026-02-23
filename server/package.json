@@ -1,1 +1,23 @@
-  
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "MERN Backend Server",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Pragneysh",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "mongoose": "^7.8.9"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
