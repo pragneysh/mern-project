@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./pages/MainLayout";
-import Home from "./pages/Home";
+// import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
@@ -10,8 +10,8 @@ function App() {
       <Routes>
 
         {/* Routes WITH Navbar */}
+        <Route path="/" element={<Signup />} /> 
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
           <Route path="/about" element={<h1>About</h1>} />
         </Route>
 
