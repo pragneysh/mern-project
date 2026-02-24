@@ -24,6 +24,7 @@ const Login = () => {
       if (res.ok) {
         setEmail("");
         setPassword("");
+        setError("");
         // You can also redirect the user to another page here
       }else {
         setError(result);

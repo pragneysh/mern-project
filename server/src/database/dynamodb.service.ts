@@ -1,6 +1,6 @@
-import { Module, Global } from '@nestjs/common';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { Module, Global } from "@nestjs/common";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
 @Global() // make it globally available
 @Module({
