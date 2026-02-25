@@ -28,6 +28,7 @@ export class UsersService {
       password: data.password,
       name: data.name,
       surname: data.surname,
+      isAdmin: false,
       jwtToken,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
+
 const Login = () => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
@@ -20,11 +23,18 @@ const Login = () => {
       const result = await res.json();
     
       Cookies.set("access_token", result.access_token, { sameSite: "none", secure: true });
+      Cookies.set("isAdmin", result.user.isAdmin, { sameSite: "none", secure: true });
 
       if (res.ok) {
         setEmail("");
         setPassword("");
         setError("");
+
+        if (result.user.isAdmin) {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/menu");
+        }
         // You can also redirect the user to another page here
       }else {
         setError(result);
