@@ -29,7 +29,6 @@ const Signup = () => {
       });
 
       const result = await res.json();
-      console.log(result);
 
       if (res.ok) {
         setName("");
