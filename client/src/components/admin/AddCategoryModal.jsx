@@ -78,10 +78,10 @@ const AddCategoryModal = ({
       hasError = true;
     }
 
-    if (!description.trim()) {
-      setDescriptionError("Description is required");
-      hasError = true;
-    }
+    // if (!description.trim()) {
+    //   setDescriptionError("Description is required");
+    //   hasError = true;
+    // }
 
     if (!imageFile && !isEditMode) {
       setImageError("Image is required");

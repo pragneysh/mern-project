@@ -2,17 +2,17 @@ import { useState } from "react";
 import { Menu, X, ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
+import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
   const token = Cookies.get("access_token");
   const [isOpen, setIsOpen] = useState(false);
 
-  const cartCount = 2; // later connect with cart state
+  const { cartCount } = useCart(); // later connect with cart state
 
   return (
     <nav className="bg-black text-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        
+      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="text-xl font-bold">
           🍽 FoodieHub
@@ -42,26 +42,24 @@ export default function Navbar() {
 
           {/* Login Button */}
           {!token ? (
-          <Link
-            to="/login"
-            className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition"
-          >
-            Login
-          </Link>) : (
             <Link
-            to="/logout"
-            className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition"
-          >
-            Logout
-          </Link>
+              to="/login"
+              className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+            >
+              Login
+            </Link>
+          ) : (
+            <Link
+              to="/logout"
+              className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+            >
+              Logout
+            </Link>
           )}
         </div>
 
         {/* Mobile Menu Button */}
-        <button
-          className="md:hidden"
-          onClick={() => setIsOpen(!isOpen)}
-        >
+        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -95,7 +93,7 @@ export default function Navbar() {
             className="block hover:text-gray-300"
             onClick={() => setIsOpen(false)}
           >
-            Cart ({cartCount})
+            Cart {cartCount > 0 && <span>({cartCount})</span>}
           </Link>
           {!token ? (
             <Link

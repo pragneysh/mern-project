@@ -11,6 +11,7 @@ import {
 } from "@nestjs/common";
 import { MenuService } from "./menu.service";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ParseUUIDPipe } from "@nestjs/common";
 
 @Controller("menu")
 export class MenuController {
@@ -43,5 +44,27 @@ export class MenuController {
   @Delete("delete-category/:id")
   deleteCategory(@Param("id") id: string) {
     return this.menuService.deleteCategory(id);
+  }
+
+  /**
+   * Start API for menu item
+   */
+
+  @Post("create-menu-item")
+  @UseInterceptors(FileInterceptor("image"))
+  createMenuItem(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { name: string; description: string; price: number; categoryId: string },
+  ) {
+    return this.menuService.createMenuItem(body, file);
+  }
+
+  @Get("menu-items")
+  getAllMenuItems() {
+    return this.menuService.getAllMenuItems();
+  }
+  @Get("categories/:id/items")
+  getCategoryMenuItems(@Param("id", new ParseUUIDPipe()) id: string) {
+    return this.menuService.getCategoryMenuItems(id);
   }
 }
