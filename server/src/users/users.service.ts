@@ -1,74 +1,69 @@
-import { Injectable } from "@nestjs/common";
-import {
-  DynamoDBDocumentClient,
-  PutCommand,
-  ScanCommand,
-} from "@aws-sdk/lib-dynamodb";
-// import * as bcrypt from "bcrypt";
-import * as jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcrypt';
+import { User } from './user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly docClient: DynamoDBDocumentClient) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  async create(data: {
-    email: string;
-    password: string;
-    name: string;
-    surname: string;
-  }) {
-    const jwtToken = jwt.sign({ email: data.email }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
-    });  // eslint-disable-line
+  // 🔹 Create User
+  async create(data: { email: string; password: string; name: string; surname: string }) {
+    // ✅ Generate JWT
+    const jwtToken = jwt.sign(
+      {
+        email: data.email,
+      },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: '1h',
+      },
+    );
 
-    const userItem = {
-      id: uuidv4(),
+    // ✅ Create entity
+    const user = this.userRepository.create({
       email: data.email,
       password: data.password,
       name: data.name,
       surname: data.surname,
       isAdmin: false,
       jwtToken,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    });
 
-    try {
-      await this.docClient.send(
-        new PutCommand({
-          TableName: "UsersFromMERN",
-          Item: userItem,
-        }),
-      );
-    } catch (error) {
-      console.error("Error creating user:", error);
-      throw error;
-    }
-
-    // ✅ Return the actual user object
-    return userItem;
+    // ✅ Save to DB
+    return await this.userRepository.save(user);
   }
 
-  async findByEmail(email: string) {
-    try {
-      const params = {
-        TableName: "UsersFromMERN",
-        FilterExpression: "#emailAttr = :emailVal",
-        ExpressionAttributeNames: { "#emailAttr": "email" },
-        ExpressionAttributeValues: { ":emailVal": email },
-      };
+  // 🔹 Find By Email
+  async findByEmail(email: string, includePassword = false): Promise<User | null> {
+    const query = this.userRepository.createQueryBuilder('user').where('user.email = :email', { email });
 
-      const result = await this.docClient.send(new ScanCommand(params));
-
-      if (!result.Items || result.Items.length === 0) {
-        return null;
-      }
-
-      return result.Items[0]; // pick the first match
-    } catch (error) {
-      console.log("Error finding user by email:", error);
-      return null;
+    if (includePassword) {
+      query.addSelect('user.password');
     }
+
+    return query.getOne();
+  }
+
+  // 🔹 Validate User (for login)
+  async validateUser(email: string, password: string) {
+    const user = await this.findByEmail(email);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return user;
   }
 }

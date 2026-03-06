@@ -1,16 +1,30 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  try {
+    const app = await NestFactory.create(AppModule, {
+      logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+    });
 
-  app.enableCors({
-    origin: 'http://localhost:5173', // Vite frontend
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: true,
-  });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    app.use(cookieParser());
 
-  await app.listen(process.env.PORT ?? 3000);
+    app.enableCors({
+      origin: 'http://localhost:5173',
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      credentials: true,
+    });
+
+    const port = process.env.PORT ?? 3000;
+
+    await app.listen(port);
+
+    console.log('🚀 Server running on port:', port);
+  } catch (error) {
+    console.error('❌ BOOTSTRAP ERROR:', error);
+  }
 }
 
-void bootstrap();
+bootstrap(); // ✅ REMOVE `void`

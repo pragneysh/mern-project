@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
-
 const Login = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const loginUser = async (e) => {
     e.preventDefault();
@@ -21,57 +21,79 @@ const Login = () => {
       });
 
       const result = await res.json();
-    
-      Cookies.set("access_token", result.access_token, { sameSite: "none", secure: true });
-      Cookies.set("isAdmin", result.user.isAdmin, { sameSite: "none", secure: true });
 
       if (res.ok) {
         setEmail("");
         setPassword("");
-        setError("");
+        setError(null);
+
+        Cookies.set("access_token", result.access_token, {
+          sameSite: "none",
+          secure: true,
+        });
+
+        Cookies.set("isAdmin", result.user.isAdmin, {
+          sameSite: "none",
+          secure: true,
+        });
 
         if (result.user.isAdmin) {
           navigate("/admin-dashboard");
         } else {
           navigate("/menu");
         }
-        // You can also redirect the user to another page here
-      }else {
+      } else {
         setError(result);
       }
     } catch (err) {
       alert(err.message);
-      console.log(err);
     }
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
+    <div className="min-h-screen flex items-center justify-center 
+                    bg-gradient-to-br from-orange-100 via-white to-orange-200 px-4">
+
+      <div className="w-full max-w-md bg-white 
+                      rounded-3xl shadow-2xl 
+                      p-6 sm:p-8">
+
         {/* Title */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Welcome Back</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Welcome Back 👋
+          </h2>
           <p className="text-gray-500 text-sm mt-2">
-            Please enter your details to sign in
-            {error && <p className="text-red-600 mt-2">{error.message}</p>}
+            Sign in to continue ordering delicious food
           </p>
+
+          {error && (
+            <p className="text-red-600 mt-3 text-sm">
+              {error.message}
+            </p>
+          )}
         </div>
 
         {/* Form */}
-        <form className="space-y-6" onSubmit={loginUser}>
+        <form className="space-y-5" onSubmit={loginUser}>
+          
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
             </label>
+
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+              className="w-full px-4 py-3 
+                         border border-gray-300 
+                         rounded-xl 
+                         focus:ring-2 focus:ring-orange-500 
+                         focus:border-orange-500
+                         focus:outline-none transition"
             />
           </div>
 
@@ -85,15 +107,21 @@ const Login = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)} 
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+                className="w-full px-4 py-3 
+                           border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-sm text-blue-500 hover:text-blue-700"
+                className="absolute right-3 top-3 text-sm 
+                           text-orange-500 hover:text-orange-700"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -103,13 +131,16 @@ const Login = () => {
           {/* Remember + Forgot */}
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center gap-2 text-gray-600">
-              <input type="checkbox" className="accent-blue-500" />
+              <input
+                type="checkbox"
+                className="accent-orange-500"
+              />
               Remember me
             </label>
 
             <a
               href="#"
-              className="text-blue-500 hover:text-blue-700 font-medium"
+              className="text-orange-500 hover:text-orange-700 font-medium"
             >
               Forgot password?
             </a>
@@ -118,18 +149,22 @@ const Login = () => {
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow-md hover:shadow-lg"
+            className="w-full py-3 rounded-xl 
+                       text-white font-semibold
+                       bg-gradient-to-r from-orange-500 to-orange-600
+                       hover:opacity-90
+                       transition shadow-lg"
           >
             Sign In
           </button>
         </form>
 
-        {/* Sign Up Link */}
-        <p className="text-sm text-gray-500 mt-4">
+        {/* Sign Up */}
+        <p className="text-sm text-gray-500 mt-6 text-center">
           Don't have an account?{" "}
           <Link
             to="/signup"
-            className="text-blue-500 hover:text-blue-700 font-medium"
+            className="text-orange-500 hover:text-orange-700 font-semibold"
           >
             Sign Up
           </Link>

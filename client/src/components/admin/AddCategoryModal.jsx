@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 
-const AddCategoryModal = ({
-  setCategories,
-  setIsModalOpen,
-  editCategory,
-}) => {
+const AddCategoryModal = ({ setCategories, setIsModalOpen, editCategory }) => {
   const isEditMode = !!editCategory;
 
   const [name, setName] = useState("");
@@ -19,8 +15,8 @@ const AddCategoryModal = ({
 
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [shake, setShake] = useState(false);
 
-  // ✅ Reset & Prefill Logic
   useEffect(() => {
     if (editCategory) {
       setName(editCategory.name || "");
@@ -31,7 +27,6 @@ const AddCategoryModal = ({
     }
   }, [editCategory]);
 
-  // ✅ Cleanup preview URL
   useEffect(() => {
     return () => {
       if (preview && imageFile) {
@@ -74,12 +69,7 @@ const AddCategoryModal = ({
     setImageError("");
 
     if (!name.trim()) {
-      setNameError("Name is required");
-      hasError = true;
-    }
-
-    if (!description.trim()) {
-      setDescriptionError("Description is required");
+      setNameError("Category name is required");
       hasError = true;
     }
 
@@ -88,7 +78,11 @@ const AddCategoryModal = ({
       hasError = true;
     }
 
-    if (hasError) return;
+    if (hasError) {
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -121,7 +115,7 @@ const AddCategoryModal = ({
 
       if (isEditMode) {
         setCategories((prev) =>
-          prev.map((cat) => (cat.id === data.id ? data : cat))
+          prev.map((cat) => (cat.id === data.id ? data : cat)),
         );
       } else {
         setCategories((prev) => [...prev, data]);
@@ -137,93 +131,153 @@ const AddCategoryModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white w-96 p-6 rounded-xl shadow-xl relative">
-        <button
-          onClick={handleClose}
-          className="absolute top-3 right-3"
-        >
-          <X size={20} />
-        </button>
+    <>
+      {/* Shake Animation */}
+      <style>
+        {`
+        @keyframes shake {
+          0% { transform: translateX(0); }
+          20% { transform: translateX(-4px); }
+          40% { transform: translateX(4px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(4px); }
+          100% { transform: translateX(0); }
+        }
 
-        <h2 className="text-xl font-bold mb-4 text-red-600">
-          {isEditMode ? "Update Category" : "Add New Category"}
-        </h2>
+        .shake {
+          animation: shake 0.35s;
+        }
+        `}
+      </style>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white w-full max-w-md rounded-2xl shadow-xl max-h-[90vh] flex flex-col overflow-hidden">
+          
+          {/* HEADER */}
+          <div className="flex items-center justify-between px-6 py-4 border-b">
+            <h2 className="text-xl font-semibold text-gray-800">
+              {isEditMode ? "Update Category" : "Add New Category"}
+            </h2>
 
-          {/* Name */}
-          <div>
-            <input
-              type="text"
-              placeholder="Category Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-            {nameError && (
-              <p className="text-red-500 text-sm mt-1">{nameError}</p>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-red-500 transition"
+            >
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* BODY */}
+          <div className="overflow-y-auto px-6 py-5 space-y-4">
+            
+            {/* Name */}
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">
+                Category Name
+              </label>
+
+              <input
+                type="text"
+                placeholder="e.g. Pizza"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg outline-none transition
+                ${nameError ? "border-red-500" : "border-gray-300"}
+                ${shake && nameError ? "shake" : ""}
+                focus:ring-2 focus:ring-orange-400`}
+              />
+
+              {nameError && (
+                <p className="text-red-500 text-xs mt-1">{nameError}</p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="text-sm text-gray-600 mb-1 block">
+                Description
+              </label>
+
+              <textarea
+                rows="3"
+                placeholder="Short description..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg outline-none transition
+                ${descriptionError ? "border-red-500" : "border-gray-300"}
+                ${shake && descriptionError ? "shake" : ""}
+                focus:ring-2 focus:ring-orange-400`}
+              />
+
+              {descriptionError && (
+                <p className="text-red-500 text-xs mt-1">{descriptionError}</p>
+              )}
+            </div>
+
+            {/* Image Upload */}
+            <div>
+              <label className="text-sm text-gray-600 mb-2 block">
+                Category Image
+              </label>
+
+              <label
+                className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-lg p-4 cursor-pointer transition
+                ${imageError ? "border-red-500" : "border-gray-300"}
+                ${shake && imageError ? "shake" : ""}
+                hover:border-orange-400`}
+              >
+                <Upload size={18} />
+                <span className="text-sm text-gray-500">
+                  Click to upload image
+                </span>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+
+              {imageError && (
+                <p className="text-red-500 text-xs mt-1">{imageError}</p>
+              )}
+            </div>
+
+            {/* Preview */}
+            {preview && (
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-full h-40 object-cover rounded-lg border"
+              />
             )}
           </div>
 
-          {/* Description */}
-          <div>
-            <textarea
-              placeholder="Category Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border rounded"
-            />
-            {descriptionError && (
-              <p className="text-red-500 text-sm mt-1">
-                {descriptionError}
-              </p>
-            )}
+          {/* FOOTER */}
+          <div className="border-t px-6 py-4 bg-white">
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className={`w-full py-2.5 rounded-lg text-white font-medium transition
+              ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
+            >
+              {loading
+                ? isEditMode
+                  ? "Updating..."
+                  : "Creating..."
+                : isEditMode
+                  ? "Update Category"
+                  : "Create Category"}
+            </button>
           </div>
-
-          {/* Image */}
-          <div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full p-2 border rounded"
-            />
-            {imageError && (
-              <p className="text-red-500 text-sm mt-1">{imageError}</p>
-            )}
-          </div>
-
-          {/* Preview */}
-          {preview && (
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-full h-40 object-cover rounded-lg border"
-            />
-          )}
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-2 rounded text-white transition ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-red-600 hover:bg-red-700"
-            }`}
-          >
-            {loading
-              ? isEditMode
-                ? "Updating..."
-                : "Creating..."
-              : isEditMode
-              ? "Update Category"
-              : "Create Category"}
-          </button>
-        </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

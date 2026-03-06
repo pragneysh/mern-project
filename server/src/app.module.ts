@@ -1,16 +1,29 @@
-import { Module } from "@nestjs/common";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-import { AuthModule } from "./auth/auth.module";
-import { UsersModule } from "./users/users.module";
-import { DynamoDBModule } from "./database/dynamodb.service";
-import { ConfigModule } from "@nestjs/config";
-import { MenuModule } from "./menu/menu.module";
-import { S3Service } from "./aws/s3.service";
-import { AwsModule } from "./aws/aws.module";
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { DynamoDBModule } from './database/dynamodb.service';
+import { DatabaseModule } from './database/database.module';
+import { ConfigModule } from '@nestjs/config';
+import { MenuModule } from './menu/menu.module';
+import { S3Service } from './aws/s3.service';
+import { AwsModule } from './aws/aws.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, DynamoDBModule, ConfigModule.forRoot({isGlobal: true}), MenuModule, AwsModule], // eslint-disable-line
+  imports: [
+    UsersModule,
+    AuthModule,
+    DynamoDBModule,
+    DatabaseModule,
+    MenuModule,
+    AwsModule,
+    OrderModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+  ], // eslint-disable-line
   controllers: [AppController],
   providers: [AppService, S3Service],
   exports: [UsersModule, AuthModule, DynamoDBModule],

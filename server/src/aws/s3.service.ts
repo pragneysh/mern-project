@@ -1,12 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { v4 as uuidv4 } from "uuid";
+import { Injectable } from '@nestjs/common';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class S3Service {
@@ -25,7 +20,7 @@ export class S3Service {
   }
 
   // ✅ Upload file to S3
-  async uploadFile(file: Express.Multer.File, folder = "uploads") {
+  async uploadFile(file: Express.Multer.File, folder = 'uploads') {
     const fileKey = `${folder}/${uuidv4()}-${file.originalname}`;
 
     await this.s3.send(

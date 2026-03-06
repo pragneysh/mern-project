@@ -14,9 +14,13 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
 
-
   const createUser = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      setError({ message: "Passwords do not match" });
+      return;
+    }
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
@@ -36,51 +40,67 @@ const Signup = () => {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
-        // You can also redirect the user to another page here
-        navigate("/login"); 
+        setError(null);
+        navigate("/login");
       } else {
         setError(result);
       }
-
     } catch (err) {
-      alert(err.message);
-      setError(err);
-      console.log(err);
+      setError({ message: err.message });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 sm:p-10">
+    <div className="min-h-screen flex items-center justify-center 
+                    bg-gradient-to-br from-orange-100 via-white to-orange-200 px-4">
+
+      {/* Card */}
+      <div className="w-full max-w-md bg-white 
+                      rounded-3xl shadow-2xl 
+                      p-6 sm:p-8">
+
         {/* Title */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">Create Account</h2>
+        <div className="text-center mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Create Account 🧡
+          </h2>
+
           <p className="text-gray-500 text-sm mt-2">
-            Please fill in the details to register
-            {error && <p className="text-red-600 mt-2">{error.message}</p>}
+            Join us and start ordering delicious food
           </p>
+
+          {error && (
+            <p className="text-red-600 text-sm mt-3">
+              {error.message}
+            </p>
+          )}
         </div>
 
         {/* Form */}
-        <form className="space-y-5" onSubmit={(e) => createUser(e)}>
-          {/* First + Last Name */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form className="space-y-5" onSubmit={createUser}>
+          
+          {/* Name Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700">
                 First Name
               </label>
               <input
-                    type="text"
-                  name="name"
-                  placeholder="First name"  
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-                />
+                type="text"
+                name="name"
+                placeholder="First name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700">
                 Last Name
               </label>
               <input
@@ -89,29 +109,37 @@ const Signup = () => {
                 placeholder="Last name"
                 value={surname}
                 onChange={(e) => setSurname(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
             </div>
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
               Email Address
             </label>
             <input
               type="email"
               name="email"
-              placeholder="Enter your email"
+              placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+              className="w-full px-4 py-3 border border-gray-300 
+                         rounded-xl 
+                         focus:ring-2 focus:ring-orange-500 
+                         focus:border-orange-500
+                         focus:outline-none transition"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
               Password
             </label>
 
@@ -122,13 +150,18 @@ const Signup = () => {
                 placeholder="Create password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-sm text-blue-500 hover:text-blue-700"
+                className="absolute right-3 top-3 text-sm 
+                           text-orange-500 hover:text-orange-700"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -137,7 +170,7 @@ const Signup = () => {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
               Confirm Password
             </label>
 
@@ -147,14 +180,21 @@ const Signup = () => {
                 name="confirmPassword"
                 placeholder="Confirm password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+                onChange={(e) =>
+                  setConfirmPassword(e.target.value)
+                }
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
 
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-3 text-sm text-blue-500 hover:text-blue-700"
+                className="absolute right-3 top-3 text-sm 
+                           text-orange-500 hover:text-orange-700"
               >
                 {showConfirm ? "Hide" : "Show"}
               </button>
@@ -163,23 +203,30 @@ const Signup = () => {
 
           {/* Terms */}
           <div className="flex items-center text-sm text-gray-600">
-            <input type="checkbox" className="accent-blue-500 mr-2" />I agree to
-            the Terms & Conditions
+            <input type="checkbox" className="accent-orange-500 mr-2" />
+            I agree to Terms & Conditions
           </div>
 
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200 shadow-md hover:shadow-lg"
+            className="w-full py-3 rounded-xl 
+                       text-white font-semibold
+                       bg-gradient-to-r from-orange-500 to-orange-600
+                       hover:opacity-90
+                       transition shadow-lg"
           >
             Sign Up
           </button>
         </form>
 
-        {/* Login Link */}
+        {/* Login */}
         <p className="text-sm text-gray-500 mt-6 text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:text-blue-700 font-medium">
+          <Link
+            to="/login"
+            className="text-orange-500 hover:text-orange-700 font-semibold"
+          >
             Sign In
           </Link>
         </p>
