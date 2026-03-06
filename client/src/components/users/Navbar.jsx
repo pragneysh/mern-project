@@ -1,14 +1,26 @@
 import { useState } from "react";
 import { Menu, X, ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const token = Cookies.get("access_token");
   const [isOpen, setIsOpen] = useState(false);
 
   const { cartCount } = useCart(); // later connect with cart state
+
+  // =========================
+  // Logout Functionality
+  // =========================
+
+  const handleLogout = () => {
+    Cookies.remove("access_token");
+    Cookies.remove("isAdmin");
+    setIsOpen(false);
+    navigate("/login");
+  };
 
   return (
     <nav className="bg-black text-white shadow-lg sticky top-0 z-50">
@@ -50,8 +62,9 @@ export default function Navbar() {
             </Link>
           ) : (
             <Link
-              to="/logout"
+              to="/login"
               className="bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+              onClick={() => handleLogout()}
             >
               Logout
             </Link>
@@ -105,9 +118,9 @@ export default function Navbar() {
             </Link>
           ) : (
             <Link
-              to="/logout"
+              to="/login"
               className="block bg-white text-black text-center py-2 rounded-lg"
-              onClick={() => setIsOpen(false)}
+              onClick={() => handleLogout()}
             >
               Logout
             </Link>

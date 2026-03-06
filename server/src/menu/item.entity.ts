@@ -6,30 +6,33 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-} from "typeorm";
-import { Category } from "./category.entity";
+} from 'typeorm';
+import { Category } from './category.entity';
 
-@Entity({ name: "items" })
+@Entity({ name: 'items' })
 export class Item {
-  @PrimaryGeneratedColumn("uuid")
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ unique: true })
   name: string;
 
-  @Column({ type: "text" })
+  @Column({ type: 'text' })
   description: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   image: string | null;
 
-  @Column({ type: "float" })
+  @Column({ type: 'float' })
   price: number;
 
+  @Column({ type: 'float', nullable: true })
+  rating: number | null;
+
   @ManyToOne(() => Category, (category) => category.items, {
-    onDelete: "CASCADE",
+    onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: "categoryId" })
+  @JoinColumn({ name: 'categoryId' })
   category: Category;
 
   @CreateDateColumn()

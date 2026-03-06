@@ -7,9 +7,12 @@ import Menu from "./pages/Menu";
 import Cart from "./pages/Cart";
 import Home from "./pages/Home";
 import Orders from "./pages/Orders";
+import Unauthorized from "./pages/Unauthorized";
 import RoleProtectedRoute from "./middleware/RoleProtectedRoute";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminMenu from "./pages/admin/AdminMenu";
+import AdminMenuItems from "./pages/admin/AdminMenuItems";
+import AdminOrder from "./pages/admin/AdminOrder";
 import { CartProvider } from "./context/CartContext";
 
 function App() {
@@ -20,6 +23,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
 
           {/* Routes WITH Navbar */}
           <Route element={<MainLayout />}>
@@ -34,6 +38,11 @@ function App() {
             <Route element={<AdminLayout />}>
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/admin/menu-items" element={<AdminMenu />} />
+              <Route path="/admin/orders" element={<AdminOrder />} />
+              <Route
+                path="/admin/category-items/:id"
+                element={<AdminMenuItems />}
+              />
               <Route path="/admin/orders" element={<h1>Orders</h1>} />
               <Route path="/admin/users" element={<h1>Users</h1>} />
             </Route>

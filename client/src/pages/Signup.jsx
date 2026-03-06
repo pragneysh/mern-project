@@ -17,6 +17,11 @@ const Signup = () => {
   const createUser = async (e) => {
     e.preventDefault();
 
+    if (password !== confirmPassword) {
+      setError({ message: "Passwords do not match" });
+      return;
+    }
+
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
 
@@ -35,48 +40,49 @@ const Signup = () => {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
+        setError(null);
         navigate("/login");
       } else {
         setError(result);
       }
     } catch (err) {
-      setError(err);
-      console.log(err);
+      setError({ message: err.message });
     }
   };
 
   return (
-    <div
-      className="
-      min-h-screen
-      bg-gradient-to-br from-blue-100 via-white to-blue-200
-      px-4
-      flex items-center justify-center
-    "
-    >
+    <div className="min-h-screen flex items-center justify-center 
+                    bg-gradient-to-br from-orange-100 via-white to-orange-200 px-4">
+
       {/* Card */}
-      <div className="w-full max-w-md mx-auto bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl p-5 sm:p-10">
+      <div className="w-full max-w-md bg-white 
+                      rounded-3xl shadow-2xl 
+                      p-6 sm:p-8">
+
         {/* Title */}
-        <div className="text-center mb-5 sm:mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
-            Create Account
+            Create Account 🧡
           </h2>
 
           <p className="text-gray-500 text-sm mt-2">
-            Please fill in the details to register
+            Join us and start ordering delicious food
           </p>
 
           {error && (
-            <p className="text-red-600 text-sm mt-2">{error.message}</p>
+            <p className="text-red-600 text-sm mt-3">
+              {error.message}
+            </p>
           )}
         </div>
 
         {/* Form */}
-        <form className="space-y-4 sm:space-y-5" onSubmit={createUser}>
+        <form className="space-y-5" onSubmit={createUser}>
+          
           {/* Name Fields */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700">
                 First Name
               </label>
               <input
@@ -85,12 +91,16 @@ const Signup = () => {
                 placeholder="First name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700">
                 Last Name
               </label>
               <input
@@ -99,14 +109,18 @@ const Signup = () => {
                 placeholder="Last name"
                 value={surname}
                 onChange={(e) => setSurname(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
             </div>
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
               Email Address
             </label>
             <input
@@ -115,13 +129,17 @@ const Signup = () => {
               placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              className="w-full px-4 py-3 border border-gray-300 
+                         rounded-xl 
+                         focus:ring-2 focus:ring-orange-500 
+                         focus:border-orange-500
+                         focus:outline-none transition"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
               Password
             </label>
 
@@ -132,13 +150,18 @@ const Signup = () => {
                 placeholder="Create password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
 
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-2.5 text-xs sm:text-sm text-blue-500"
+                className="absolute right-3 top-3 text-sm 
+                           text-orange-500 hover:text-orange-700"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -147,7 +170,7 @@ const Signup = () => {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
               Confirm Password
             </label>
 
@@ -157,14 +180,21 @@ const Signup = () => {
                 name="confirmPassword"
                 placeholder="Confirm password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                onChange={(e) =>
+                  setConfirmPassword(e.target.value)
+                }
+                className="w-full px-4 py-3 border border-gray-300 
+                           rounded-xl 
+                           focus:ring-2 focus:ring-orange-500 
+                           focus:border-orange-500
+                           focus:outline-none transition"
               />
 
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-2.5 text-xs sm:text-sm text-blue-500"
+                className="absolute right-3 top-3 text-sm 
+                           text-orange-500 hover:text-orange-700"
               >
                 {showConfirm ? "Hide" : "Show"}
               </button>
@@ -172,24 +202,31 @@ const Signup = () => {
           </div>
 
           {/* Terms */}
-          <div className="flex items-center text-xs sm:text-sm text-gray-600">
-            <input type="checkbox" className="accent-blue-500 mr-2" />I agree to
-            Terms & Conditions
+          <div className="flex items-center text-sm text-gray-600">
+            <input type="checkbox" className="accent-orange-500 mr-2" />
+            I agree to Terms & Conditions
           </div>
 
           {/* Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2.5 sm:py-3 text-sm sm:text-base rounded-lg font-semibold hover:bg-blue-700 transition"
+            className="w-full py-3 rounded-xl 
+                       text-white font-semibold
+                       bg-gradient-to-r from-orange-500 to-orange-600
+                       hover:opacity-90
+                       transition shadow-lg"
           >
             Sign Up
           </button>
         </form>
 
         {/* Login */}
-        <p className="text-sm sm:text-sm text-gray-500 mt-5">
+        <p className="text-sm text-gray-500 mt-6 text-center">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:text-blue-700 font-medium">
+          <Link
+            to="/login"
+            className="text-orange-500 hover:text-orange-700 font-semibold"
+          >
             Sign In
           </Link>
         </p>

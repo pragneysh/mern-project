@@ -25,7 +25,7 @@ export async function getCategories() {
     cachedCategories = [defaultCategory, ...data];
 
     return cachedCategories;
-  } catch (error) {
+  } catch (error) { 
     console.error("Category API Error:", error);
 
     // fallback safe return

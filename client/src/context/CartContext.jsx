@@ -5,6 +5,7 @@ const CartContext = createContext({
   addToCart: () => {},
   removeFromCart: () => {},
   updateQty: () => {},
+  clearCart: () => {},
   cartCount: 0,
 });
 
@@ -16,7 +17,7 @@ export function CartProvider({ children }) {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
         return prev.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i,
         );
       }
       return [...prev, { ...item, quantity: 1 }];
@@ -38,23 +39,32 @@ export function CartProvider({ children }) {
                   ? item.quantity + 1
                   : Math.max(item.quantity - 1, 1),
             }
-          : item
-      )
+          : item,
+      ),
     );
   };
 
-  const cartCount = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
+  // ✅ NEW FUNCTION
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, updateQty, cartCount }}
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateQty,
+        clearCart, // ✅ exposed
+        cartCount,
+      }}
     >
       {children}
     </CartContext.Provider>
   );
 }
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => useContext(CartContext); // eslint-disable-line
