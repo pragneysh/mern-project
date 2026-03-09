@@ -13,6 +13,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminMenu from "./pages/admin/AdminMenu";
 import AdminMenuItems from "./pages/admin/AdminMenuItems";
 import AdminOrder from "./pages/admin/AdminOrder";
+import AdminTable from "./pages/admin/AdminTable";
 import { CartProvider } from "./context/CartContext";
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/admin/menu-items" element={<AdminMenu />} />
               <Route path="/admin/orders" element={<AdminOrder />} />
+              <Route path="/admin/tables" element={<AdminTable />} />
               <Route
                 path="/admin/category-items/:id"
                 element={<AdminMenuItems />}
