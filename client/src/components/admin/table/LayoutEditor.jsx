@@ -107,8 +107,6 @@ export default function LayoutEditor() {
   // SAVE LAYOUT
   const saveLayout = async () => {
     try {
-      console.log(tables);
-
       (await axios.patch("http://localhost:3000/tables/layout", {
         tables,
       }),

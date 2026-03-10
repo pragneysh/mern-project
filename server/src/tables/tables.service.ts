@@ -19,7 +19,6 @@ export class TablesService {
 
   // Create table
   async create(body: any): Promise<RestaurantTable> {
-    console.log(body);
     const table = this.tableRepository.create({
       tableNumber: body.tableNumber,
       capacity: body.capacity,
@@ -74,13 +73,12 @@ export class TablesService {
   async updateLayout(body: any) {
     const tables = body.tables;
 
-    // console.log(tables);
     return Promise.all(
       tables.map(async (item) => {
         const table = await this.tableRepository.findOne({
           where: { id: item.id },
         });
-        console.log(table);
+
         if (!table) {
           throw new NotFoundException(`Table ${item.tableNumber} not found`);
         }

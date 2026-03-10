@@ -146,7 +146,7 @@ export class OrderService {
         // eslint-disable-line
         // ✅ Admin gets all orders
         orders = await this.orderRepo.find({
-          relations: ['items', 'items.item', 'user'],
+          relations: ['items', 'items.item', 'user', 'table'],
           order: {
             createdAt: 'DESC',
           },
@@ -155,7 +155,7 @@ export class OrderService {
         // ✅ Normal user gets only their orders
         orders = await this.orderRepo.find({
           where: { user: { id: dbUser.id } }, // eslint-disable-line
-          relations: ['items', 'items.item', 'user'],
+          relations: ['items', 'items.item', 'user', 'table'],
           order: {
             createdAt: 'DESC',
           },
