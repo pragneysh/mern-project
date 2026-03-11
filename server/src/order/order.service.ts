@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Order } from './order.entity';
 import { OrderItem } from './order-item.entity';
-import { OrderStatus } from './order.entity';
 import { Item } from '../menu/item.entity';
 import { User } from '../users/user.entity';
 import { RestaurantTable } from '../tables/table.entity';
@@ -143,7 +142,6 @@ export class OrderService {
         throw new NotFoundException('User not found');
       }
       if (dbUser.isAdmin === true) {
-        // eslint-disable-line
         // ✅ Admin gets all orders
         orders = await this.orderRepo.find({
           relations: ['items', 'items.item', 'user', 'table'],
@@ -154,7 +152,7 @@ export class OrderService {
       } else {
         // ✅ Normal user gets only their orders
         orders = await this.orderRepo.find({
-          where: { user: { id: dbUser.id } }, // eslint-disable-line
+          where: { user: { id: dbUser.id } },
           relations: ['items', 'items.item', 'user', 'table'],
           order: {
             createdAt: 'DESC',
@@ -178,7 +176,7 @@ export class OrderService {
       if (!order) {
         throw new NotFoundException('Order not found');
       }
-      order.status = OrderStatus[body.status]; // eslint-disable-line
+      order.status = body.status; // eslint-disable-line
 
       await this.orderRepo.save(order);
 
