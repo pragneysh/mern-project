@@ -1,0 +1,190 @@
+name: Deploy React App to S3
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      provision_bucket:
+        description: "Provision S3 bucket? (yes = first-time setup + deploy, no = deploy only)"
+        required: true
+        default: "no"
+        type: choice
+        options:
+          - "yes"
+          - "no"
+
+env:
+  NODE_VERSION: "20"
+  BUILD_DIR: dist   # change to 'build' if using CRA
+
+jobs:
+  # ============================================================================
+  # JOB 1 — PROVISION (one-time setup)
+  # Only runs when manually triggered with provision_bucket = 'yes'
+  # Safe to re-run — checks bucket existence before creating
+  # ============================================================================
+  provision:
+    name: Provision S3 Bucket
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.provision_bucket == 'yes'
+
+    steps:
+      # ── 1. Configure AWS credentials ─────────────────────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # ── 2. Check if bucket already exists ────────────────────────────────────
+      - name: Check if bucket exists
+        id: bucket_check
+        run: |
+          if aws s3api head-bucket --bucket "${{ secrets.S3_BUCKET_NAME }}" 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "⚠ Bucket already exists — skipping creation, re-applying config."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✔ Bucket does not exist — will create now."
+          fi
+
+      # ── 3. Create S3 bucket ───────────────────────────────────────────────────
+      - name: Create S3 bucket
+        if: steps.bucket_check.outputs.exists == 'false'
+        run: |
+          if [ "${{ secrets.AWS_REGION }}" = "us-east-1" ]; then
+            aws s3api create-bucket \
+              --bucket "${{ secrets.S3_BUCKET_NAME }}" \
+              --region "${{ secrets.AWS_REGION }}"
+          else
+            aws s3api create-bucket \
+              --bucket "${{ secrets.S3_BUCKET_NAME }}" \
+              --region "${{ secrets.AWS_REGION }}" \
+              --create-bucket-configuration LocationConstraint="${{ secrets.AWS_REGION }}"
+          fi
+          echo "✔ Bucket created: ${{ secrets.S3_BUCKET_NAME }}"
+
+      # ── 4. Disable Block Public Access ───────────────────────────────────────
+      - name: Disable block public access
+        run: |
+          aws s3api put-public-access-block \
+            --bucket "${{ secrets.S3_BUCKET_NAME }}" \
+            --public-access-block-configuration \
+              "BlockPublicAcls=false,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false"
+          echo "✔ Public access unblocked"
+
+      # ── 5. Enable static website hosting ─────────────────────────────────────
+      - name: Enable static website hosting
+        run: |
+          aws s3 website "s3://${{ secrets.S3_BUCKET_NAME }}" \
+            --index-document index.html \
+            --error-document index.html
+          echo "✔ Static website hosting enabled"
+
+      # ── 6. Attach public-read bucket policy ──────────────────────────────────
+      - name: Set bucket policy (public read)
+        run: |
+          aws s3api put-bucket-policy \
+            --bucket "${{ secrets.S3_BUCKET_NAME }}" \
+            --policy "{
+              \"Version\": \"2012-10-17\",
+              \"Statement\": [{
+                \"Sid\": \"PublicReadGetObject\",
+                \"Effect\": \"Allow\",
+                \"Principal\": \"*\",
+                \"Action\": \"s3:GetObject\",
+                \"Resource\": \"arn:aws:s3:::${{ secrets.S3_BUCKET_NAME }}/*\"
+              }]
+            }"
+          echo "✔ Bucket policy applied"
+
+      # ── 7. Provision summary ──────────────────────────────────────────────────
+      - name: Provision summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ S3 Bucket provisioned and configured!"
+          echo "🪣 Bucket : s3://${{ secrets.S3_BUCKET_NAME }}"
+          echo "🌍 Region : ${{ secrets.AWS_REGION }}"
+          echo "🌐 URL    : http://${{ secrets.S3_BUCKET_NAME }}.s3-website-${{ secrets.AWS_REGION }}.amazonaws.com"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "👉 Proceeding to deploy..."
+
+  # ============================================================================
+  # JOB 2 — DEPLOY
+  # Triggers:
+  #   • Every push to main (provision is skipped, deploy runs directly)
+  #   • Manual dispatch with provision_bucket = 'yes' (runs AFTER provision)
+  #   • Manual dispatch with provision_bucket = 'no'  (runs directly)
+  # ============================================================================
+  deploy:
+    name: Build & Deploy to S3
+    runs-on: ubuntu-latest
+    needs: [provision]
+    if: >-
+      always() &&
+      needs.provision.result != 'failure' &&
+      (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch'
+      )
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Node setup + cache ──────────────────────────────────────────────
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      # ── 3. Install dependencies ────────────────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ── 4. Build React app ─────────────────────────────────────────────────
+      - name: Build React application
+        run: npm run build
+        env:
+          VITE_APP_ENV: production
+          # Add more VITE_ vars here as needed
+
+      # ── 5. Configure AWS credentials ───────────────────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # ── 6. Sync build output to S3 ─────────────────────────────────────────
+      - name: Deploy to S3
+        run: |
+          # Static assets — 1 year cache (content-hashed filenames handle busting)
+          aws s3 sync ${{ env.BUILD_DIR }}/ s3://${{ secrets.S3_BUCKET_NAME }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html"
+
+          # index.html — no-cache so users always get the latest entry point
+          aws s3 cp ${{ env.BUILD_DIR }}/index.html s3://${{ secrets.S3_BUCKET_NAME }}/index.html \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
+
+      # ── 7. Deployment summary ──────────────────────────────────────────────
+      - name: Deployment summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Deployment complete!"
+          echo "🌐 URL    : http://${{ secrets.S3_BUCKET_NAME }}.s3-website-${{ secrets.AWS_REGION }}.amazonaws.com"
+          echo "🪣 Bucket : s3://${{ secrets.S3_BUCKET_NAME }}"
+          echo "🌿 Branch : ${{ github.ref_name }}"
+          echo "🔖 Commit : ${{ github.sha }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
