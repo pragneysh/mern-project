@@ -9,9 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Order } from './order.entity';
 import { OrderItem } from './order-item.entity';
-import { OrderStatus } from './order.entity';
 import { Item } from '../menu/item.entity';
 import { User } from '../users/user.entity';
+import { RestaurantTable } from '../tables/table.entity';
 
 // ✅ DTOs for type safety
 interface CartItemDTO {
@@ -29,6 +29,7 @@ interface ConfirmOrderDTO {
   items: CartItemDTO[];
   mobile: string;
   cart: CartDTO;
+  tableNumber: string;
 }
 
 @Injectable()
@@ -45,15 +46,22 @@ export class OrderService {
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+
+    @InjectRepository(RestaurantTable)
+    private readonly tableRepo: Repository<RestaurantTable>,
   ) {}
 
   async confirmOrder(body: ConfirmOrderDTO, userId: string) {
-    const { items, mobile, cart } = body;
+    const { items, mobile, cart, tableNumber } = body;
 
     // ================= Validate Request =================
-    if (!mobile || !cart || !items || items.length === 0) {
+    if (!mobile || !cart || !items || items.length === 0 || tableNumber === null) {
       throw new BadRequestException('Invalid order data');
     }
+
+    // ================= Find Table =================
+    const table = await this.tableRepo.findOne({ where: { tableNumber: tableNumber } });
+    if (!table) throw new NotFoundException('Table not found');
 
     // ================= Find User =================
     const user = await this.userRepo.findOne({ where: { id: userId } });
@@ -71,6 +79,7 @@ export class OrderService {
       subtotal: cart.subtotal,
       gst: cart.gst,
       total: cart.total,
+      table: table,
     });
 
     let savedOrder: Order;
@@ -127,12 +136,15 @@ export class OrderService {
   async getOrders(user: any) {
     try {
       let orders;
+      const dbUser = await this.userRepo.findOne({ where: { id: user } }); //eslint-disable-line
 
-      if (user.isAdmin) {
-        // eslint-disable-line
+      if (!dbUser) {
+        throw new NotFoundException('User not found');
+      }
+      if (dbUser.isAdmin === true) {
         // ✅ Admin gets all orders
         orders = await this.orderRepo.find({
-          relations: ['items', 'items.item', 'user'],
+          relations: ['items', 'items.item', 'user', 'table'],
           order: {
             createdAt: 'DESC',
           },
@@ -140,8 +152,8 @@ export class OrderService {
       } else {
         // ✅ Normal user gets only their orders
         orders = await this.orderRepo.find({
-          where: { user: { id: user.id } }, // eslint-disable-line
-          relations: ['items', 'items.item', 'user'],
+          where: { user: { id: dbUser.id } },
+          relations: ['items', 'items.item', 'user', 'table'],
           order: {
             createdAt: 'DESC',
           },
@@ -164,7 +176,7 @@ export class OrderService {
       if (!order) {
         throw new NotFoundException('Order not found');
       }
-      order.status = OrderStatus[body.status]; // eslint-disable-line
+      order.status = body.status; // eslint-disable-line
 
       await this.orderRepo.save(order);
 

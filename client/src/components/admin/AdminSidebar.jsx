@@ -1,4 +1,13 @@
-import { X, LayoutDashboard, ShoppingBag, Utensils, Users, BarChart3, Settings } from "lucide-react";
+import {
+  X,
+  LayoutDashboard,
+  ShoppingBag,
+  Utensils,
+  Users,
+  BarChart3,
+  Settings,
+  TableCellsMerge,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export default function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
@@ -27,7 +36,6 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
 
       {/* Navigation */}
       <nav className="p-4 space-y-2">
-
         <NavLink
           to="/admin-dashboard"
           className={({ isActive }) =>
@@ -59,6 +67,16 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
         </NavLink>
 
         <NavLink
+          to="/admin/tables"
+          className={({ isActive }) =>
+            `${linkClass} ${isActive ? activeClass : ""}`
+          }
+        >
+          <TableCellsMerge size={18} />
+          Tables
+        </NavLink>
+
+        <NavLink
           to="/admin/customers"
           className={({ isActive }) =>
             `${linkClass} ${isActive ? activeClass : ""}`
@@ -87,7 +105,6 @@ export default function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
           <Settings size={18} />
           Settings
         </NavLink>
-
       </nav>
     </div>
   );

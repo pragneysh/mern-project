@@ -3,6 +3,8 @@ import { Package, CalendarDays, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
+import OrdersTable from "../components/admin/dashboard/OrdersTable";
+
 function Orders() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
@@ -91,66 +93,8 @@ function Orders() {
             </button>
           </div>
         ) : (
-          <div className="space-y-8">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className="bg-white/80 backdrop-blur-lg border border-gray-200 p-6 rounded-3xl shadow-md hover:shadow-xl transition duration-300"
-              >
-                {/* Top */}
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-5">
-                  <div>
-                    <p className="font-bold text-xl text-gray-800">
-                      {order.orderNumber}
-                    </p>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
-                      <CalendarDays size={16} />
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-
-                  <span
-                    className={`px-4 py-1.5 rounded-full text-sm font-semibold mt-3 md:mt-0 ${getStatusStyle(
-                      order.status
-                    )}`}
-                  >
-                    {order.status}
-                  </span>
-                </div>
-
-                {/* Items */}
-                <div className="border-t border-gray-200 pt-4 space-y-2">
-                  {order.items?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex justify-between text-gray-700 text-sm"
-                    >
-                      <span>{item.item?.name}</span>
-                      <span className="font-medium">× {item.quantity}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Bottom */}
-                <div className="border-t border-gray-200 mt-5 pt-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Phone size={16} />
-                      Mobile: {order.mobile}
-                    </div>
-
-                    <p className="text-xl font-bold text-orange-600 mt-1">
-                      ₹{order.total}
-                    </p>
-                  </div>
-
-                  <button className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:scale-105 transition transform shadow-md">
-                    View Details
-                  </button>
-                </div>
-              </div>
-            ))}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <OrdersTable statusFilter={""} />
           </div>
         )}
       </div>

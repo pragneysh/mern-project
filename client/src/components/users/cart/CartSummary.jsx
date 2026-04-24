@@ -1,19 +1,45 @@
 import React, { useState } from "react";
-import { useCart } from "../../../context/CartContext";
 import Cookies from "js-cookie";
+
+import { useCart } from "../../../context/CartContext";
+import TableLayout from "../TableLayout";
+
+import ConfirmModal from "../../common/ConfirmModal";
+import Toast from "../../common/Toast";
 
 export default function CartSummary({ cart, cartItems }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mobile, setMobile] = useState("");
+  const [selectedTable, setSelectedTable] = useState(null);
+
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+
   const { clearCart } = useCart();
 
   const handleOrderPlacement = () => {
     setIsModalOpen(true);
   };
 
+  const showToastMessage = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+  };
+
+  const handleToastClose = () => {
+    setShowToast(false);
+  };
+
   const handleConfirmOrder = async () => {
     if (!mobile || mobile.length !== 10) {
-      alert("Please enter a valid 10-digit mobile number");
+      showToastMessage("Please enter a valid mobile number", "error");
+      return;
+    }
+
+    if (!selectedTable) {
+      showToastMessage("Please select a table", "error");
       return;
     }
 
@@ -24,7 +50,9 @@ export default function CartSummary({ cart, cartItems }) {
       })),
       mobile,
       cart,
+      tableNumber: selectedTable,
     };
+
     try {
       const response = await fetch(
         "http://localhost:3000/order/confirm-order",
@@ -35,7 +63,6 @@ export default function CartSummary({ cart, cartItems }) {
             Authorization: `Bearer ${Cookies.get("access_token")}`,
           },
           credentials: "include",
-          withCredentials: true,
           body: JSON.stringify(orderPayload),
         },
       );
@@ -47,11 +74,19 @@ export default function CartSummary({ cart, cartItems }) {
 
       const result = await response.json();
 
-      alert(`Order Placed! Order No: ${result.orderNumber}`);
+      if (!result.success) {
+        throw new Error(result.message || "Order failed");
+      }
 
-      clearCart(); 
+      clearCart();
       setIsModalOpen(false);
       setMobile("");
+      setSelectedTable(null);
+
+      showToastMessage(
+        `Order placed successfully for table ${selectedTable}`,
+        "success",
+      );
     } catch (error) {
       console.error("Error placing order:", error);
       alert(error.message);
@@ -93,17 +128,15 @@ export default function CartSummary({ cart, cartItems }) {
         </button>
       </div>
 
-      {/* ================= Responsive Modern Modal ================= */}
+      {/* ================= Modal ================= */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm">
-          {/* Modal Container */}
           <div
             className="bg-white w-full sm:w-[92%] sm:max-w-md 
-                          rounded-t-3xl sm:rounded-3xl 
-                          p-5 sm:p-6 
-                          shadow-2xl 
-                          animate-slideUp
-                          max-h-[95vh] overflow-y-auto"
+            rounded-t-3xl sm:rounded-3xl 
+            p-5 sm:p-6 
+            shadow-2xl 
+            max-h-[95vh] overflow-y-auto"
           >
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
@@ -152,10 +185,29 @@ export default function CartSummary({ cart, cartItems }) {
                 maxLength={10}
                 placeholder="Enter 10-digit mobile number"
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 
-                           focus:outline-none focus:ring-2 focus:ring-orange-500 
-                           transition text-sm sm:text-base"
+                focus:outline-none focus:ring-2 focus:ring-orange-500 
+                transition text-sm sm:text-base"
               />
             </div>
+
+            {/* Table Layout */}
+            <div className="w-full mb-5">
+              <h3 className="text-sm font-semibold text-gray-800 mb-3">
+                Select Table
+              </h3>
+
+              <TableLayout
+                selectedTable={selectedTable}
+                setSelectedTable={setSelectedTable}
+              />
+            </div>
+
+            {/* Selected Table */}
+            {selectedTable && (
+              <div className="bg-orange-50 border border-orange-200 text-orange-700 px-3 py-2 rounded-lg mb-4 text-sm">
+                Selected Table: <strong>{selectedTable}</strong>
+              </div>
+            )}
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
@@ -182,6 +234,14 @@ export default function CartSummary({ cart, cartItems }) {
           </div>
         </div>
       )}
+
+      {/* ================= Toast ================= */}
+      <Toast
+        message={toastMessage}
+        show={showToast}
+        onClose={handleToastClose}
+        type={toastType}
+      />
     </>
   );
 }

@@ -10,6 +10,7 @@ import { MenuModule } from './menu/menu.module';
 import { S3Service } from './aws/s3.service';
 import { AwsModule } from './aws/aws.module';
 import { OrderModule } from './order/order.module';
+import { TablesModule } from './tables/tables.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { OrderModule } from './order/order.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    TablesModule,
   ], // eslint-disable-line
   controllers: [AppController],
   providers: [AppService, S3Service],

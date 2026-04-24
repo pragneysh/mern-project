@@ -3,9 +3,9 @@ import { ORDER_STATUSES } from "../../../config/orderStatus";
 
 export default function OrderCard({ order, onOpen }) {
   const statusConfig = ORDER_STATUSES.find((s) => s.value === order.status);
-
   return (
     <div className="bg-[#F8F5F2] rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col h-full">
+      
       <div className="flex justify-between items-start">
         <div>
           <h2 className="font-semibold text-sm text-gray-800">
@@ -16,6 +16,13 @@ export default function OrderCard({ order, onOpen }) {
             <Calendar size={12} />
             {new Date(order.createdAt).toLocaleDateString()}
           </div>
+
+          {/* Table Number */}
+          {order.table && (
+            <p className="text-xs text-gray-600 mt-1">
+              Table: <span className="font-medium">{order.table.tableNumber}</span>
+            </p>
+          )}
         </div>
 
         <span

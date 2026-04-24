@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { OrderItem } from './order-item.entity';
 import { User } from '../users/user.entity';
+import { RestaurantTable } from '../tables/table.entity';
 
 export enum OrderStatus {
   PENDING = 'Pending',
@@ -24,11 +25,9 @@ export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // 🔥 Custom Display Order ID (#ORD00001)
   @Column({ unique: true })
   orderNumber: string;
 
-  // ✅ Proper User Relation
   @ManyToOne(() => User, (user) => user.orders, {
     onDelete: 'CASCADE',
   })
@@ -53,6 +52,14 @@ export class Order {
     default: OrderStatus.PENDING,
   })
   status: OrderStatus;
+
+  // 🔗 Many Orders → One Table
+  @ManyToOne(() => RestaurantTable, (table) => table.orders, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'tableId' })
+  table: RestaurantTable;
 
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })
   items: OrderItem[];
